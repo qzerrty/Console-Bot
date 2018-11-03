@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Console.bot</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="main.css">
+</head>
+<body>
+	<div class="wrapper">
+		<div class="console">
+			<div class="output">
+				<p>Welcome random user! If you are using this console first time than try <span class="clickable" onclick="javascript:void(field.value = this.innerHTML)">$help</span> and <span class="clickable" onclick="javascript:void(field.value = this.innerHTML)">$info</span> to get useful information about this instrument.</p>
+			</div>
+			<input type="text" id="commandfield" autofocus>
+			<button class="enter" onclick="checkInput()">⇦</button>
+		</div>
+	</div>
+	<script src="main.js"></script>
+</body>
+</html>
