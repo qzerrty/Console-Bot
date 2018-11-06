@@ -2,6 +2,8 @@ const field = document.querySelector('#commandfield')
 const output = document.querySelector('.output')
 const consol = document.querySelector('.console')
 const enter = document.querySelector('.enter')
+const e = Math.E
+const pi = Math.PI
 
 const cin = '<span class="cin">≫</span>'
 const cout = '<span class="cout">≪</span>'
@@ -34,27 +36,33 @@ let currentPosition = -1
 let history = []
 
 let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi', 'info', 'usersinfo', 'getrandomcolor']
+let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos', 'asin', 'atan', 'tan']
 
 function checkInput() {
 	let val = field.value
 	field.value = ''
 
-	history.push(val)
 	currentPosition = -1
 
 	if (val != '') {
+		history.push(val)
 
 		 if (val[0] == '$') {
 
 			try {
 				let answer = val.substr(1).replace(/ /g, '').toLowerCase()
 
-				if (commandsList.includes(answer))
-					answer += '()'
-				eval(answer)
+				if (mathFunctions.includes(answer.substr(0, answer.indexOf('(')))) {
+					output.innerHTML += `<p>${cin + answer.substr(0, answer.indexOf('('))}(${answer.substr(answer.indexOf('(') + 1, answer.indexOf(')') - 1)}</p>`
+					output.innerHTML += `<p>${cout}${eval(answer)}</p>`
+				} else {
+					if (commandsList.includes(answer))
+						answer += '()'
+					eval(answer)
 
-				if (answer.search(/[=]/) != -1)
-					output.innerHTML += `<p>${cout + answer.substr(0, answer.search(/[=]/) + 1) + eval(answer.substr(answer.search(/[=]/) + 1))}</p>`
+					if (answer.search(/[=]/) != -1)
+						output.innerHTML += `<p>${cout + answer.substr(0, answer.search(/[=]/) + 1) + eval(answer.substr(answer.search(/[=]/) + 1))}</p>`
+				}
 
 			} catch (err) {
 				output.innerHTML += `<p>${cout + '<span class="err">' + err.name + '</span>' + '<br>' + err.message}</p>`
@@ -103,12 +111,12 @@ function sayhi() {
 
 function help() {
 	output.innerHTML += `<p>${cout}Use $ to call next commands: <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">help</span> - show all commands <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">clrscr</span> - clear screen <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">clrhistory</span> - clear commands history <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">sayhi</span> - says Hello <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">usersinfo</span> - get info about user <br>
-	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">getrandomcolor</span> - get random color
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">help</span> - show all commands <br>
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">clrscr</span> - clear screen <br>
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">clrhistory</span> - clear commands history <br>
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">sayhi</span> - says Hello <br>
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">usersinfo</span> - get info about user <br>
+	<span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)" title="Add to command line">getrandomcolor</span> - get random color
 	</p>`
 }
 
@@ -118,7 +126,9 @@ function info(number = 0) {
 			output.innerHTML += `<p>${cout}Math module: <br>
 			You can use default math operations like +, -, /, *, %, **. <br>
 			Also you can use logical operators: &, |, >>>, <<<. <br>
-			Avaiable math functions: round, floor, ceil, sin, cos, asin, acos, tan, atan, abs. You can call them by using $. Example: $ <span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">round(4.5)</span> // output 5
+			Avaiable math functions: round, floor, ceil, sin, cos, asin, acos, tan, atan, abs. You can call them by using $.
+			Example: $ <span class="clickable" onclick="javascript:void(field.value = '$' + this.innerHTML)">round(4.5)</span> // output 5 <br>
+			Constans: pi = ${pi}, e = ${e} <br>
 			</p>`
 			break
 		default:
@@ -130,7 +140,7 @@ function info(number = 0) {
 			and then h will be equal to 4 and you can use it after.
 			You can do math operations in command line. <br>
 			Addition modules: <br>
-			<span class="clickable" onclick="javascript:void(field.value = this.innerHTML)">$info(1)</span> - Math module
+			<span class="clickable" onclick="javascript:void(field.value = this.innerHTML)" title="Add to command line">$info(1)</span> - Math module
 			</p>`
 			break
 	}
@@ -158,55 +168,77 @@ function getrandomcolor() {
 
 	output.innerHTML += `<p>${cout} What about this one? 
 	<span class="color-block" style="background-color: #${color}"></span> 
-	<span class="clickable" onclick="javascript:void(navigator.clipboard.writeText(this.innerHTML))">${color}</span></p>`
+	<span class="clickable" onclick="copyText(this.innerHTML)" title="Click to copy">${color}</span></p>`
 }
 
 function round(num = 0) {
-	output.innerHTML += `<p>${cin}round(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.round(num)}</p>`
+	return Math.round(num)
 }
 
 function ceil(num = 0) {
-	output.innerHTML += `<p>${cin}ceil(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.ceil(num)}</p>`
+	return Math.ceil(num)
 }
 
 function floor(num = 0) {
-	output.innerHTML += `<p>${cin}floor(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.floor(num)}</p>`
+	return Math.floor(num)
 }
 
 function sin(num = 0) {
-	output.innerHTML += `<p>${cin}sin(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.sin(num)}</p>`
+	return Math.sin(num)
 }
 
 function cos(num = 0) {
-	output.innerHTML += `<p>${cin}cos(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.cos(num)}</p>`
+	return Math.cos(num)
 }
 
 function abs(num = 0) {
-	output.innerHTML += `<p>${cin}abs(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.abs(num)}</p>`
+	return Math.abs(num)
 }
 
 function acos(num = 0) {
-	output.innerHTML += `<p>${cin}acos(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.acos(num)}</p>`
+	return Math.acos(num)
 }
 
 function asin(num = 0) {
-	output.innerHTML += `<p>${cin}asin(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.asin(num)}</p>`
+	return Math.asin(num)
 }
 
 function atan(num = 0) {
-	output.innerHTML += `<p>${cin}atan(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.atan(num)}</p>`
+	return Math.atan(num)
 }
 
 function tan(num = 0) {
-	output.innerHTML += `<p>${cin}tan(${num})</p>`
-	output.innerHTML += `<p>${cout}${Math.tan(num)}</p>`
+	return Math.tan(num)
+}
+
+function copyText(str) {
+	navigator.clipboard.writeText(str)
+}
+
+function solve(str) {
+
+	output.innerHTML += `<p>${cin + str}</p>`
+
+	function f(x) {
+		return eval(str)
+	}
+
+	function check(a, b, e) {
+		if (b - a >= e) {
+			let c = (a + b) / 2
+			if (f(a) * f(c) < 0)
+				check(a, c, e)
+			else
+				check(c,b,e)
+		} else
+			output.innerHTML += `<p>${cout + a} Approximate value: ${round(a)}</p>`
+	}
+
+	let a = -1000, b = 1000, h = 0.1
+	while (a < b) {
+		let z = a + h
+		if (f(a) * f(z) < 0)
+			check(a, z, 0.00001)
+		a = z
+	}
 }
