@@ -215,9 +215,9 @@ function copyText(str) {
 	navigator.clipboard.writeText(str)
 }
 
-function solve(str) {
+function solve(str, lowerRange, upperRange, step) {
 
-	output.innerHTML += `<p>${cin + str}</p>`
+	output.innerHTML += `<p>${cin}Solves of function ${str} on the interval from ${lowerRange} to ${upperRange} with step = ${step}:</p>`
 
 	function f(x) {
 		return eval(str)
@@ -234,11 +234,10 @@ function solve(str) {
 			output.innerHTML += `<p>${cout + a} Approximate value: ${round(a)}</p>`
 	}
 
-	let a = -1000, b = 1000, h = 0.1
-	while (a < b) {
-		let z = a + h
-		if (f(a) * f(z) < 0)
-			check(a, z, 0.00001)
-		a = z
+	while (lowerRange < upperRange) {
+		let z = lowerRange + step
+		if (f(lowerRange) * f(z) < 0)
+			check(lowerRange, z, 0.00001)
+		lowerRange = z
 	}
 }
