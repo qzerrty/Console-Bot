@@ -10,19 +10,26 @@ class Special {
 		this.output = document.querySelector('.output')
 		this.consol = document.querySelector('.console')
 		this.enter = document.querySelector('.enter')
+		this.lastOutput = ''
 	}
 
-	outconsole(str) {
+	outconsole(str, additionStr = '') {
 		this.output.innerHTML += `<p>${str}</p>`
+		this.lastOutput = additionStr
 	}
 
 }
 
-let sp = new Special()
+let sP = new Special()
 
 window.addEventListener('keypress', e => {
+
 	if (e.which == 13)
 		checkInput()
+
+	if (sP.field.value.replace(/ /g, '').search(/[+-/\*%&|~<>\^]/) == 0) {
+		sP.field.value = sP.lastOutput + sP.field.value
+	}
 })
 
 window.addEventListener('keydown', e => {
@@ -38,23 +45,25 @@ window.addEventListener('keydown', e => {
 })
 
 window.addEventListener('load', () => {
-	sp.enter.style['top'] = sp.field.offsetTop + 'px'
+	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 })
 
 window.addEventListener('resize', () => {
-	sp.enter.style['top'] = sp.field.offsetTop + 'px'
+	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 })
 
 let currentPosition = -1
 let history = []
 
-let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi', 'info', 'usersinfo', 'getrandomcolor']
-let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos', 'asin', 'atan', 'tan', 'log']
+let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi', 
+	'info', 'usersinfo', 'getrandomcolor', 'showmeyourself']
+let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos', 
+	'asin', 'atan', 'tan', 'log']
 
 function checkInput() {
 
-	let val = sp.field.value
-	sp.field.value = ''
+	let val = sP.field.value
+	sP.field.value = ''
 
 	currentPosition = -1
 
@@ -64,24 +73,31 @@ function checkInput() {
 		if (val[0] == '$') {
 
 			try {
-				let answer = val.substr(1).replace(/ /g, '').toLowerCase()
-
-				if (mathFunctions.includes(answer.substr(0, answer.indexOf('(')))) {
-					sp.outconsole(sp.cin + answer.substr(0, answer.indexOf('(')) + '(' + answer.substr(answer.indexOf('(') +
-						1, answer.indexOf(')') - 1))
-					sp.outconsole(sp.cout + eval(answer))
-				} else {
-					if (commandsList.includes(answer))
-						answer += '()'
-					eval(answer)
-
-					if (answer.search(/[=]/) != -1)
-						sp.outconsole(sp.cout + answer.substr(0, answer.search(/[=]/) + 1) +
+				let answer = val.substr(1).replace(/  /g, ' ').toLowerCase()
+				if (answer.search(/[=]/) != -1) {
+						sP.outconsole(sP.cout + answer.substr(0, answer.search(/[=]/) + 1) +
 							eval(answer.substr(answer.search(/[=]/) + 1)))
+						eval(answer)
 				}
+				else {
+					answer = answer.substr(answer.search(/[a-zA-Z]/)).split(' ').filter(word => word != '')
 
+					if (mathFunctions.includes(answer[0])) {
+						sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
+						sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0})`))
+					} else
+						if (answer[0] == 'solve')
+							eval(`${answer[0]}(${answer[1]},${answer[2] || -10},${answer[3] || 10},${answer[4] || .1})`)
+						else if (answer[0] == 'info')
+							eval(`${answer[0]}(${answer[1] || 0})`)
+						else {
+							if (commandsList.includes(answer[0]))
+								answer[0] += '()'
+							eval(answer[0])
+						}
+				}
 			} catch (err) {
-				sp.outconsole(`${sp.cout}<span class="err">${err.name}</span><br>${err.message}`)
+				sP.outconsole(`${sP.cout}<span class="err">${err.name}</span><br>${err.message}`)
 			}
 
 		} else if (val.search(/[+-/\*%&|~<>\^]/) != -1) {
@@ -89,64 +105,69 @@ function checkInput() {
 			try {
 				let answer = eval(val)
 
-				sp.outconsole(`${sp.cin}<span class="clickable" onclick="javascript:void(sp.field.value = 
+				sP.outconsole(`${sP.cin}<span class="clickable" onclick="javascript:void(sP.field.value = 
 					this.innerHTML)">${val}</span>`)
-				sp.outconsole(`${sp.cout}<span class="clickable" onclick="javascript:void(sp.field.value = 
-					this.innerHTML)">${answer}</span>`)
+				sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value = 
+					this.innerHTML)">${answer}</span>`, answer)
 			} catch (err) {
-				sp.outconsole(`${sp.cout}<span class="err">${err.name}</span><br>${err.message}`)
+				sP.outconsole(`${sP.cout}<span class="err">${err.name}</span><br>${err.message}`)
 			}
 
 		} else if (val.replace(/ /g, '').toLowerCase() == 'whatdouknowaboutme?' ||
 			val.replace(/ /g, '').toLowerCase() == 'whatdoyouknowaboutme?') {
-			sp.outconsole(sp.cin + '<span class="clickable" onclick="javascript:void(sp.field.value = this.innerHTML)">' +
+			sP.outconsole(sP.cin + '<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)">' +
 				val + '</span>')
 			usersinfo('Not so much...')
 		} else
-			sp.outconsole(sp.cin + val)
+			sP.outconsole(sP.cin + val)
 
 	}
 
-	sp.consol.scrollTop = sp.field.offsetTop
-	sp.enter.style['top'] = sp.field.offsetTop + 'px'
+	sP.consol.scrollTop = sP.field.offsetTop
+	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 
 }
 
 function getFromHistory() {
-	sp.field.value = history[currentPosition] == undefined ? '' : history[currentPosition]
+	sP.field.value = history[currentPosition] == undefined ? '' : history[currentPosition]
 }
 
 function clrscr() {
-	sp.output.innerHTML = '<p>Cleaned</p>'
+	sP.output.innerHTML = '<p>Cleaned</p>'
 }
 
 function clrhistory() {
 	history = []
-	sp.outconsole('History cleaned')
+	sP.outconsole('History cleaned')
 }
 
 function sayhi() {
-	sp.outconsole(`${sp.cout} Hello World!`)
+	sP.outconsole(`${sP.cout} Hello World!`)
 }
 
 function help() {
 
-	sp.outconsole(`${sp.cout} Use $ to call next commands: <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">help</span> - show all commands <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">clrscr</span> - clear screen <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">clrhistory</span> - clear commands history <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">sayhi</span> - says Hello <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">usersinfo</span> - get info about user <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">getrandomcolor</span> - get random color <br>
-	<span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)" title="Add 
-	to command line">solve</span> - solve the equation, check <span class="clickable" onclick="javascript:void(sp.field.value = this.innerHTML)" title="Add to command 
-	line">$info(2)</span> to get more information`)
+	sP.outconsole(`${sP.cout} Use $ to call next commands: <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">help</span> - shows all commands <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">info</span> - information about project <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">clrscr</span> - clear screen <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">clrhistory</span> - clear commands history <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">sayhi</span> - says Hello <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">usersinfo</span> - get info about user <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">getrandomcolor</span> - get random color <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">solve</span> - solves the equation, check <span class="clickable" 
+	onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
+	line">$info 2</span> to get more information <br>
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	title="Add to command line">showmeyourself</span> - shows logo`)
 
 }
 
@@ -154,37 +175,39 @@ function info(number = 0) {
 
 	switch (number) {
 		case 1:
-			sp.outconsole(`${sp.cout}Math module: <br>
+			sP.outconsole(`${sP.cout}Math module: <br>
 			You can use default math operations like +, -, /, *, %, **. <br>
 			Also you can use logical operators: &, |, >>>, <<<. <br>
 			Avaiable math functions: round, floor, ceil, sin, cos, asin, acos, tan, atan, abs, log.
 			You can call them by using $.
-			Example: $ <span class="clickable" onclick="javascript:void(sp.field.value = '$' + this.innerHTML)">
-			round(4.5)</span> // output 5 <br>
+			Example: $ <span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
+			>round 4.5</span> // output 5 <br>
 			Constans: pi = ${pi}, e = ${e}`)
 			break
 
 		case 2:
-			sp.outconsole(`${sp.cout}Solve module: <br>
+			sP.outconsole(`${sP.cout}Solve module: <br>
 				Use $ to call solve function. First argument is equation that you need to solve, put it into '' or "".
 				Also, you can give to this function some optional parameters:
 				lower and upper ranges to check values; step, small step will give you more accuracy, 
-				but will spend more time.`)
+				but will sPend more time. <br>
+				Example: $ <span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
+				>solve 'x-1'</span>`)
 			break
 
 		default:
-			sp.outconsole(`${sp.cout}Information: <br>
+			sP.outconsole(`${sP.cout}Information: <br>
 			The first thing you should know - this instrument is interpreter of JavaScript. <br>
-			You can use special symbol $ to call commands from <span class="clickable" 
-			onclick="javascript:void(sp.field.value = this.innerHTML)">$help</span> list. <br>
+			You can use sPecial symbol $ to call commands from <span class="clickable" 
+			onclick="javascript:void(sP.field.value = this.innerHTML)">$help</span> list. <br>
 			Also you can use JavaScript syntax to operate variables. 
-			Just write <span class="clickable" onclick="javascript:void(sp.field.value = this.innerHTML)">
-			$h = 4</span>, and then h will be equal to 4 and you can use it after.
+			Just write <span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)">$h = 4</span>
+			, and then h will be equal to 4 and you can use it after.
 			You can do math operations in command line. <br> Addition modules: <br>
-			<span class="clickable" onclick="javascript:void(sp.field.value = this.innerHTML)" title="Add to command 
-			line">$info(1)</span> - Math module <br>
-			<span class="clickable" onclick="javascript:void(sp.field.value = this.innerHTML)" title="Add to command 
-			line">$info(2)</span> - Solve module`)
+			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
+			line">$info 1</span> - Math module <br>
+			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
+			line">$info 2</span> - Solve module`)
 			break
 	}
 
@@ -192,7 +215,7 @@ function info(number = 0) {
 
 function usersinfo(string = 'All, I know about you:') {
 
-	sp.outconsole(`${sp.cout + string}<br>
+	sP.outconsole(`${sP.cout + string}<br>
 	Width X Height of your window: ${window.innerWidth}px X ${window.innerHeight}px <br>
 	Width X Height of your screen: ${screen.width}px X ${screen.height}px <br>
 	Color depth of your screen: ${screen.colorDepth} <br>
@@ -212,7 +235,7 @@ function getrandomcolor() {
 		color += variable
 	}
 
-	sp.outconsole(`${sp.cout} What about this one? 
+	sP.outconsole(`${sP.cout} What about this one? 
 	<span class="color-block" style="background-color: #${color}"></span> 
 	<span class="clickable" onclick="copyText(this.innerHTML)" title="Click to copy">${color}</span>`)
 
@@ -266,9 +289,13 @@ function copyText(str) {
 	navigator.clipboard.writeText(str)
 }
 
+function showmeyourself() {
+	sP.outconsole(`<img src="logobot.png" alt="console-bot"><br>It's me, Hi!`)
+}
+
 function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 
-	sp.outconsole(`${sp.cin}Solves of equation ${str} = 0 on the interval from 
+	sP.outconsole(`${sP.cin}Solves of equation ${str} = 0 on the interval from 
 		${lowerRange} to ${upperRange} with step = ${step}:`)
 
 	function f(x) {
@@ -283,9 +310,9 @@ function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 			else
 				check(c, b, e)
 		} else if (f(round(a)) == 0)
-			sp.outconsole(`${sp.cout + round(a)}`)
+			sP.outconsole(`${sP.cout + round(a)}`)
 		else
-			sp.outconsole(`${sp.cout + a} Approximate value: ${round(a)}`)
+			sP.outconsole(`${sP.cout + a} Approximate value: ${round(a)}`)
 	}
 
 	while (lowerRange < upperRange) {
