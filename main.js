@@ -1,6 +1,7 @@
+// declaration math constants
 const e = Math.E
 const pi = Math.PI
-
+// creating class for special functions and variables 
 class Special {
 
 	constructor() {
@@ -23,7 +24,7 @@ class Special {
 let sP = new Special()
 
 window.addEventListener('keypress', e => {
-
+	// enter listener
 	if (e.which == 13)
 		checkInput()
 
@@ -33,7 +34,7 @@ window.addEventListener('keypress', e => {
 })
 
 window.addEventListener('keydown', e => {
-
+	// arrows listener
 	if (e.which == 38) {
 		currentPosition = currentPosition - 1 < 0 ? history.length - 1 : currentPosition - 1
 		getFromHistory()
@@ -55,10 +56,12 @@ window.addEventListener('resize', () => {
 let currentPosition = -1
 let history = []
 
-let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi', 
-	'info', 'usersinfo', 'getrandomcolor', 'showmeyourself']
-let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos', 
-	'asin', 'atan', 'tan', 'log']
+let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi',
+	'info', 'usersinfo', 'getrandomcolor', 'showmeyourself'
+]
+let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos',
+	'asin', 'atan', 'tan', 'log'
+]
 
 function checkInput() {
 
@@ -73,28 +76,46 @@ function checkInput() {
 		if (val[0] == '$') {
 
 			try {
-				let answer = val.substr(1).replace(/  /g, ' ').toLowerCase()
-				if (answer.search(/[=]/) != -1) {
-						sP.outconsole(sP.cout + answer.substr(0, answer.search(/[=]/) + 1) +
-							eval(answer.substr(answer.search(/[=]/) + 1)))
-						eval(answer)
+				let answer = val.substr(1).toLowerCase() // deleting $
+
+				while (answer.indexOf('  ') != -1)
+					answer = answer.replace(/  /g, ' ') // removing useless spaces
+
+				if (answer.indexOf('\'') != -1) { // special processing for solving function
+					let fun = answer.substr(answer.indexOf('\''), answer.lastIndexOf('\'') - answer.indexOf('\'') + 1)
+					let fun2 = fun
+
+					while (fun.indexOf(' ') != -1)
+						fun = fun.replace(/ /g, '')
+
+					answer = answer.substr(0, answer.indexOf('\'')) + fun + answer.substr(answer.lastIndexOf('\'') + 1)
 				}
-				else {
+
+				if (answer.search(/[=]/) != -1) { // simple expression solver
+					sP.outconsole(sP.cout + answer.substr(0, answer.search(/[=]/) + 1) +
+						eval(answer.substr(answer.search(/[=]/) + 1)))
+					eval(answer)
+				} else {
 					answer = answer.substr(answer.search(/[a-zA-Z]/)).split(' ').filter(word => word != '')
 
 					if (mathFunctions.includes(answer[0])) {
-						sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
-						sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0})`))
-					} else
-						if (answer[0] == 'solve')
-							eval(`${answer[0]}(${answer[1]},${answer[2] || -10},${answer[3] || 10},${answer[4] || .1})`)
-						else if (answer[0] == 'info')
-							eval(`${answer[0]}(${answer[1] || 0})`)
-						else {
-							if (commandsList.includes(answer[0]))
-								answer[0] += '()'
-							eval(answer[0])
+						if (answer[0] == 'log') {
+							sP.outconsole(`${sP.cin + answer[0]}<sub>${(answer[2] || '')}</sub>(${answer[1] || 0})`)
+							sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0}, ${answer[2] || e})`))
+						} else {
+							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
+							sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0})`))
 						}
+					} else
+					if (answer[0] == 'solve')
+						eval(`${answer[0]}(${answer[1]},${answer[2] || -10},${answer[3] || 10},${answer[4] || .1})`)
+					else if (answer[0] == 'info')
+						eval(`${answer[0]}(${answer[1] || 0})`)
+					else {
+						if (commandsList.includes(answer[0]))
+							answer[0] += '()'
+						eval(answer[0])
+					}
 				}
 			} catch (err) {
 				sP.outconsole(`${sP.cout}<span class="err">${err.name}</span><br>${err.message}`)
@@ -150,22 +171,30 @@ function help() {
 	sP.outconsole(`${sP.cout} Use $ to call next commands: <br>
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">help</span> - shows all commands <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">info</span> - information about project <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">clrscr</span> - clear screen <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">clrhistory</span> - clear commands history <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">sayhi</span> - says Hello <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">usersinfo</span> - get info about user <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">getrandomcolor</span> - get random color <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">solve</span> - solves the equation, check <span class="clickable" 
 	onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
 	line">$info 2</span> to get more information <br>
+
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
 	title="Add to command line">showmeyourself</span> - shows logo`)
 
