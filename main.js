@@ -1,7 +1,7 @@
 // declaration math constants
 const e = Math.E
 const pi = Math.PI
-// creating class for special functions and variables 
+// creating class for special functions and variables
 class Special {
 
 	constructor() {
@@ -17,6 +17,17 @@ class Special {
 	outconsole(str, additionStr = '') {
 		this.output.innerHTML += `<p>${str}</p>`
 		this.lastOutput = additionStr
+	}
+
+	printArray(array) {
+		let print = '<div class="closeable">' + this.cout +
+		'<label><input type="checkbox" onclick="checkClose(this)"><span class="clickable" title="Click to open/close">Array</span></label> ['
+
+		for (let index in array)
+			print += `<p>${array[index]},</p>`
+
+		print += ']</div>'
+		this.output.innerHTML += print
 	}
 
 }
@@ -57,10 +68,10 @@ let currentPosition = -1
 let history = []
 
 let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi',
-	'info', 'usersinfo', 'getrandomcolor', 'showmeyourself'
+	'info', 'usersinfo', 'getrandomcolor'
 ]
-let mathFunctions = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos',
-	'asin', 'atan', 'tan', 'log'
+let functionsWithParams = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos',
+	'asin', 'atan', 'tan', 'log', 'getdiveders', 'nod', 'nok'
 ]
 
 function checkInput() {
@@ -79,9 +90,9 @@ function checkInput() {
 				let answer = val.substr(1).toLowerCase() // deleting $
 
 				while (answer.indexOf('  ') != -1)
-					answer = answer.replace(/  /g, ' ') // removing useless spaces
+					answer = answer.replace(/  /g, ' ') // removing useless double spaces
 
-				if (answer.indexOf('\'') != -1) { // special processing for solving function
+				if (answer.indexOf('\'') != -1) { // removing all spaces from expression
 					let fun = answer.substr(answer.indexOf('\''), answer.lastIndexOf('\'') - answer.indexOf('\'') + 1)
 					let fun2 = fun
 
@@ -98,10 +109,20 @@ function checkInput() {
 				} else {
 					answer = answer.substr(answer.search(/[a-zA-Z]/)).split(' ').filter(word => word != '')
 
-					if (mathFunctions.includes(answer[0])) {
+					if (functionsWithParams.includes(answer[0])) {
 						if (answer[0] == 'log') {
 							sP.outconsole(`${sP.cin + answer[0]}<sub>${(answer[2] || '')}</sub>(${answer[1] || 0})`)
-							sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0}, ${answer[2] || e})`))
+							let outputLine = eval(`${answer[0]}(${answer[1] || 0}, ${answer[2] || e})`)
+							sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value =
+								this.innerHTML)">${outputLine}</span>`, outputLine)
+						} else if (answer[0] == 'nod' || answer[0] == 'nok') {
+							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 1},${(answer[2] || 1)})`)
+							let outputLine = eval(`${answer[0]}(${answer[1] || 1}, ${answer[2] || 1})`)
+							sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value =
+								this.innerHTML)">${outputLine}</span>`, outputLine)
+						} else if (answer[0] == 'getdiveders') {
+							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
+							getdiveders(answer[1] || 0)
 						} else {
 							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
 							sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0})`))
@@ -126,9 +147,9 @@ function checkInput() {
 			try {
 				let answer = eval(val)
 
-				sP.outconsole(`${sP.cin}<span class="clickable" onclick="javascript:void(sP.field.value = 
+				sP.outconsole(`${sP.cin}<span class="clickable" onclick="javascript:void(sP.field.value =
 					this.innerHTML)">${val}</span>`)
-				sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value = 
+				sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value =
 					this.innerHTML)">${answer}</span>`, answer)
 			} catch (err) {
 				sP.outconsole(`${sP.cout}<span class="err">${err.name}</span><br>${err.message}`)
@@ -162,41 +183,34 @@ function clrhistory() {
 	sP.outconsole('History cleaned')
 }
 
-function sayhi() {
-	sP.outconsole(`${sP.cout} Hello World!`)
-}
-
 function help() {
 
 	sP.outconsole(`${sP.cout} Use $ to call next commands: <br>
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">help</span> - shows all commands <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">info</span> - information about project <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">clrscr</span> - clear screen <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">clrhistory</span> - clear commands history <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">sayhi</span> - says Hello <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">usersinfo</span> - get info about user <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">getrandomcolor</span> - get random color <br>
 
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
-	title="Add to command line">solve</span> - solves the equation, check <span class="clickable" 
-	onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
-	line">$info 2</span> to get more information <br>
-
-	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)" 
-	title="Add to command line">showmeyourself</span> - shows logo`)
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
+	title="Add to command line">solve</span> - solves the equation, check <span class="clickable"
+	onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command
+	line">$info 2</span> to get more information`)
 
 }
 
@@ -218,7 +232,7 @@ function info(number = 0) {
 			sP.outconsole(`${sP.cout}Solve module: <br>
 				Use $ to call solve function. First argument is equation that you need to solve, put it into '' or "".
 				Also, you can give to this function some optional parameters:
-				lower and upper ranges to check values; step, small step will give you more accuracy, 
+				lower and upper ranges to check values; step, small step will give you more accuracy,
 				but will sPend more time. <br>
 				Example: $ <span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 				>solve 'x-1'</span>`)
@@ -227,15 +241,15 @@ function info(number = 0) {
 		default:
 			sP.outconsole(`${sP.cout}Information: <br>
 			The first thing you should know - this instrument is interpreter of JavaScript. <br>
-			You can use sPecial symbol $ to call commands from <span class="clickable" 
+			You can use sPecial symbol $ to call commands from <span class="clickable"
 			onclick="javascript:void(sP.field.value = this.innerHTML)">$help</span> list. <br>
-			Also you can use JavaScript syntax to operate variables. 
+			Also you can use JavaScript syntax to operate variables.
 			Just write <span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)">$h = 4</span>
 			, and then h will be equal to 4 and you can use it after.
 			You can do math operations in command line. <br> Addition modules: <br>
-			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
+			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command
 			line">$info 1</span> - Math module <br>
-			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command 
+			<span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command
 			line">$info 2</span> - Solve module`)
 			break
 	}
@@ -264,8 +278,8 @@ function getrandomcolor() {
 		color += variable
 	}
 
-	sP.outconsole(`${sP.cout} What about this one? 
-	<span class="color-block" style="background-color: #${color}"></span> 
+	sP.outconsole(`${sP.cout} What about this one?
+	<span class="color-block" style="background-color: #${color}"></span>
 	<span class="clickable" onclick="copyText(this.innerHTML)" title="Click to copy">${color}</span>`)
 
 }
@@ -314,17 +328,47 @@ function log(num = 0, base = e) {
 	return Math.log(num) / Math.log(base)
 }
 
+function getdiveders(input) {
+
+	let output = []
+	for (let i = 1; i < Math.ceil(input ** 0.5); i++)
+		if (input % i == 0) {
+			output.push(i)
+			output.push(input / i)
+		}
+	if (Math.ceil(input ** 0.5) ** 2 == input)
+		output.push(Math.ceil(input ** 0.5))
+
+	sP.printArray(output.sort( (x, y) => {return x - y}))
+}
+
+function nod(a, b) {
+	while (a != 0 && b != 0) {
+		if (a > b)
+        a %= b
+    else
+        b %= a
+	}
+
+	return a + b
+}
+
+function nok(a, b) {
+	return a * b / nod(a, b)
+}
+
 function copyText(str) {
 	navigator.clipboard.writeText(str)
 }
 
-function showmeyourself() {
-	sP.outconsole(`<img src="logobot.png" alt="console-bot"><br>It's me, Hi!`)
+function sayhi() {
+	sP.outconsole(`<img src="logobot.png" alt="console-bot"><br>Hi, my name is Johny!`)
 }
 
 function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 
-	sP.outconsole(`${sP.cin}Solves of equation ${str} = 0 on the interval from 
+	let answers = []
+	sP.outconsole(`${sP.cin}Solves of equation ${str} = 0 on the interval from
 		${lowerRange} to ${upperRange} with step = ${step}:`)
 
 	function f(x) {
@@ -339,9 +383,9 @@ function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 			else
 				check(c, b, e)
 		} else if (f(round(a)) == 0)
-			sP.outconsole(`${sP.cout + round(a)}`)
+			answers.push(round(a))
 		else
-			sP.outconsole(`${sP.cout + a} Approximate value: ${round(a)}`)
+			answers.push(`${a} Approximate value: ${round(a)}`)
 	}
 
 	while (lowerRange < upperRange) {
@@ -351,4 +395,19 @@ function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 		lowerRange = anotherRange
 	}
 
+	sP.printArray(answers)
+
+}
+
+function checkClose(element) {
+	if (element.checked)
+		element.parentNode.parentNode.childNodes.forEach( el => {
+			if (el.tagName == 'P') el.style['display'] = 'none'
+		})
+	else
+		element.parentNode.parentNode.childNodes.forEach( el => {
+			if (el.tagName == 'P') el.style['display'] = 'block'
+		})
+	sP.consol.scrollTop = sP.field.offsetTop
+	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 }
