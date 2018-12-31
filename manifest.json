@@ -1,0 +1,16 @@
+{
+  "short_name": "Johny",
+  "name": "Johny Math Bot",
+  "description": "The Web-application that will let you to play with math!",
+  "icons": [
+    {
+      "src": "logobot.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    }
+  ],
+  "start_url": "/console-bot/?source=pwa",
+  "background_color": "#282828",
+  "display": "standalone",
+  "theme_color": "#13001d"
+}

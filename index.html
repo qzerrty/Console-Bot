@@ -3,9 +3,14 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Johny</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="keywords" content="A little toy to play with math">
+	<meta name="Description" content="WEB-app that can let You play with math!">
 	<link rel="icon" type="image/x-icon" href="logobot.png">
 	<link rel="stylesheet" href="main.css">
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#282828">
 </head>
 <body>
 	<div class="wrapper">
@@ -16,7 +21,7 @@
 				and <span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command line">$info</span>
 				to get useful information about this instrument.</p>
 			</div>
-			<input type="text" id="commandfield" autofocus>
+			<input type="text" id="commandfield" name="commandline" autofocus>
 			<button class="enter" onclick="checkInput()">⇦</button>
 		</div>
 	</div>
