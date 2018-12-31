@@ -164,7 +164,7 @@ else b%=a}
 return a+b}
 function nok(a,b){return a*b/nod(a,b)}
 function copyText(str){navigator.clipboard.writeText(str)}
-function sayhi(){sP.outconsole(`<img src="images/256.png" alt="console-bot"><br>Hi, my name is Johny!`)}
+function sayhi(){sP.outconsole(`<img src="images/firefox/firefox-general-256-256.png" alt="console-bot"><br>Hi, my name is Johny!`)}
 function solve(str,lowerRange=-10,upperRange=10,step=.1){let answers=[]
 sP.outconsole(`${sP.cin}Solves of equation ${str} = 0 on the interval from
 		${lowerRange} to ${upperRange} with step = ${step}:`)
