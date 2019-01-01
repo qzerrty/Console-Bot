@@ -416,7 +416,7 @@
       "sizes": "16x16"
     }
   ],
-  "start_url": "/console-bot/?source=pwa",
+  "start_url": "/Сonsole-bot/?source=pwa",
   "background_color": "#282828",
   "display": "standalone",
   "theme_color": "#13001d"
