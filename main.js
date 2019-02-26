@@ -41,7 +41,7 @@ window.addEventListener('keypress', e => {
 	if (e.which == 13)
 		checkInput()
 
-	if (sP.field.value.replace(/ /g, '').search(/[+-/\*%&|~<>\^]/) == 0) {
+	if (sP.field.value.replace(/ /g, '').search(/[+-/\*%&\|~<>\^]/) == 0) {
 		sP.field.value = sP.lastOutput + sP.field.value
 	}
 })
@@ -58,23 +58,29 @@ window.addEventListener('keydown', e => {
 
 })
 
-window.addEventListener('load', () => {
+window.addEventListener('load', _ => {
 	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 })
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', _ => {
 	sP.enter.style['top'] = sP.field.offsetTop + 'px'
 })
 
 let currentPosition = -1
 let history = []
 
-let commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi',
-	'info', 'usersinfo', 'getrandomcolor'
-]
-let functionsWithParams = ['round', 'ceil', 'floor', 'sin', 'cos', 'abs', 'acos',
-	'asin', 'atan', 'tan', 'log', 'getdiveders', 'nod', 'nok'
-]
+const commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi',
+	'info', 'usersinfo', 'getrandomcolor']
+
+const functionsWithParams = ['round', 'ceil', 'floor', 'abs', 'sin', 'cos', 'tan', 'asin',
+	'acos', 'atan', 'log', 'getdividers', 'gcd', 'lcm']
+
+const functionsDescriptions = ['round to the nearest integer',
+	'round up to a larger integer value', 'round to a lower integer value',
+	'returns absolute value', 'returns sine', 'returns cosine', 'returns tangent',
+	'returns arcsine', 'returns arccosine', 'returns arctangent', 'returns logarithm',
+	'returns all dividers of number', 'returns greatest common divisor',
+	'returns least common multiple']
 
 function checkInput() {
 
@@ -89,10 +95,10 @@ function checkInput() {
 		if (val[0] == '$') {
 
 			try {
-				let answer = val.substr(1).toLowerCase() // deleting $
+				let answer = val.substr(1).toLowerCase() // deleting $ symbol
 
 				while (answer.indexOf('  ') != -1)
-					answer = answer.replace(/  /g, ' ') // removing useless double spaces
+					answer = answer.replace(/  /g, ' ') // removing double spaces
 
 				if (answer.indexOf('\'') != -1) { // removing all spaces from expression
 					let fun = answer.substr(answer.indexOf('\''), answer.lastIndexOf('\'') - answer.indexOf('\'') + 1)
@@ -108,26 +114,35 @@ function checkInput() {
 					sP.outconsole(sP.cout + answer.substr(0, answer.search(/[=]/) + 1) +
 						eval(answer.substr(answer.search(/[=]/) + 1)))
 					eval(answer)
+					console.log(`simple expression`)
 				} else {
 					answer = answer.substr(answer.search(/[a-zA-Z]/)).split(' ').filter(word => word != '')
 
 					if (functionsWithParams.includes(answer[0])) {
 						if (answer[0] == 'log') {
+
 							sP.outconsole(`${sP.cin + answer[0]}<sub>${(answer[2] || '')}</sub>(${answer[1] || 0})`)
 							let outputLine = eval(`${answer[0]}(${answer[1] || 0}, ${answer[2] || e})`)
 							sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value =
 								this.innerHTML)">${outputLine}</span>`, outputLine)
-						} else if (answer[0] == 'nod' || answer[0] == 'nok') {
+
+						} else if (answer[0] == 'gcd' || answer[0] == 'lcm') {
+
 							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 1},${(answer[2] || 1)})`)
 							let outputLine = eval(`${answer[0]}(${answer[1] || 1}, ${answer[2] || 1})`)
 							sP.outconsole(`${sP.cout}<span class="clickable" onclick="javascript:void(sP.field.value =
 								this.innerHTML)">${outputLine}</span>`, outputLine)
-						} else if (answer[0] == 'getdiveders') {
+
+						} else if (answer[0] == 'getdividers') {
+
 							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
 							getdiveders(answer[1] || 0)
+
 						} else {
+
 							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
 							sP.outconsole(sP.cout + eval(`${answer[0]}(${answer[1] || 0})`))
+
 						}
 					} else
 					if (answer[0] == 'solve')
@@ -186,7 +201,6 @@ function clrhistory() {
 }
 
 function help() {
-
 	sP.outconsole(`${sP.cout} Use $ to call next commands: <br>
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">help</span> - shows all commands <br>
@@ -213,7 +227,6 @@ function help() {
 	title="Add to command line">solve</span> - solves the equation, check <span class="clickable"
 	onclick="javascript:void(sP.field.value = this.innerHTML)" title="Add to command
 	line">$info 2</span> to get more information`)
-
 }
 
 function info(number = 0) {
@@ -223,7 +236,8 @@ function info(number = 0) {
 			sP.outconsole(`${sP.cout}Math module: <br>
 			You can use default math operations like +, -, /, *, %, **. <br>
 			Also you can use logical operators: &, |, >>>, <<<. <br>
-			Avaiable math functions: round, floor, ceil, sin, cos, asin, acos, tan, atan, abs, log.
+			Avaiable math functions:
+			<table><tr><td>Function</td><td>Description</td></tr>${getStringWithFunctions()}</table>
 			You can call them by using $.
 			Example: $ <span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 			>round 4.5</span> // output 5 <br>
@@ -243,7 +257,7 @@ function info(number = 0) {
 		default:
 			sP.outconsole(`${sP.cout}Information: <br>
 			The first thing you should know - this instrument is interpreter of JavaScript. <br>
-			You can use sPecial symbol $ to call commands from <span class="clickable"
+			You can use special symbol $ to call commands from <span class="clickable"
 			onclick="javascript:void(sP.field.value = this.innerHTML)">$help</span> list. <br>
 			Also you can use JavaScript syntax to operate variables.
 			Just write <span class="clickable" onclick="javascript:void(sP.field.value = this.innerHTML)">$h = 4</span>
@@ -255,11 +269,9 @@ function info(number = 0) {
 			line">$info 2</span> - Solve module`)
 			break
 	}
-
 }
 
 function usersinfo(string = 'All, I know about you:') {
-
 	sP.outconsole(`${sP.cout + string}<br>
 	Width X Height of your window: ${window.innerWidth}px X ${window.innerHeight}px <br>
 	Width X Height of your screen: ${screen.width}px X ${screen.height}px <br>
@@ -267,13 +279,10 @@ function usersinfo(string = 'All, I know about you:') {
 	Pixel depth of your screen: ${screen.pixelDepth}px <br>
 	You default language is ${navigator.language} <br>
 	That's all, I hope you liked my power :)`)
-
 }
 
 function getrandomcolor() {
-
 	let color = ''
-
 	for (let i = 0; i < 3; i++) {
 		let variable = Math.floor(Math.random() * 256).toString(16)
 		variable = variable.length == 1 ? 0 + variable : variable
@@ -283,7 +292,6 @@ function getrandomcolor() {
 	sP.outconsole(`${sP.cout} What about this one?
 	<span class="color-block" style="background-color: #${color}"></span>
 	<span class="clickable" onclick="copyText(this.innerHTML)" title="Click to copy">${color}</span>`)
-
 }
 
 function round(num = 0) {
@@ -330,8 +338,7 @@ function log(num = 0, base = e) {
 	return Math.log(num) / Math.log(base)
 }
 
-function getdiveders(input) {
-
+function getdividers(input) {
 	let output = []
 	for (let i = 1; i < Math.ceil(input ** 0.5); i++)
 		if (input % i == 0) {
@@ -344,19 +351,18 @@ function getdiveders(input) {
 	sP.printArray(output.sort( (x, y) => {return x - y}))
 }
 
-function nod(a, b) {
+function gcd(a, b) {
 	while (a != 0 && b != 0) {
 		if (a > b)
         a %= b
     else
         b %= a
 	}
-
 	return a + b
 }
 
-function nok(a, b) {
-	return a * b / nod(a, b)
+function lcm(a, b) {
+	return a * b / gcd(a, b)
 }
 
 function copyText(str) {
@@ -398,7 +404,6 @@ function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
 	}
 
 	sP.printArray(answers)
-
 }
 
 function checkClose(element) {
@@ -406,8 +411,17 @@ function checkClose(element) {
 		element.parentNode.parentNode.childNodes[4].style['display'] = 'none'
 	else
 		element.parentNode.parentNode.childNodes[4].style['display'] = 'block'
+
 	sP.consol.scrollTop = sP.field.offsetTop
 	sP.enter.style['top'] = sP.field.offsetTop + 'px'
+}
+
+function getStringWithFunctions() {
+	let answerString = ''
+	for (let i = 0; i < functionsWithParams.length; i++)
+		answerString += `<tr><td>${functionsWithParams[i]}</td><td>${functionsDescriptions[i]}</td></tr>`
+
+	return answerString
 }
 
 //This is the "Offline copy of pages" service worker
