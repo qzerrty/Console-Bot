@@ -70,7 +70,7 @@ let currentPosition = -1
 let history = []
 
 const commandsList = ['help', 'clrscr', 'clrhistory', 'sayhi',
-	'info', 'usersinfo', 'getrandomcolor']
+	'info', 'usersinfo', 'getrandomcolor', 'version']
 
 const functionsWithParams = ['round', 'ceil', 'floor', 'abs', 'sin', 'cos', 'tan', 'asin',
 	'acos', 'atan', 'log', 'getdividers', 'gcd', 'lcm']
@@ -114,7 +114,6 @@ function checkInput() {
 					sP.outconsole(sP.cout + answer.substr(0, answer.search(/[=]/) + 1) +
 						eval(answer.substr(answer.search(/[=]/) + 1)))
 					eval(answer)
-					console.log(`simple expression`)
 				} else {
 					answer = answer.substr(answer.search(/[a-zA-Z]/)).split(' ').filter(word => word != '')
 
@@ -136,7 +135,7 @@ function checkInput() {
 						} else if (answer[0] == 'getdividers') {
 
 							sP.outconsole(`${sP.cin + answer[0]}(${answer[1] || 0})`)
-							getdiveders(answer[1] || 0)
+							getdividers(answer[1] || 0)
 
 						} else {
 
@@ -159,7 +158,8 @@ function checkInput() {
 				sP.outconsole(`${sP.cout}<span class="err">${err.name}</span><br>${err.message}`)
 			}
 
-		} else if (val.search(/[+-/\*%&|~<>\^]/) != -1) {
+		} else if (val.search(/[+-/\*%&|~<>\^(pi)(e)]/) != -1 || functionsWithParams.some(func => val.search(new RegExp(func)) != -1)) {
+			val = handleExpression(val)
 
 			try {
 				let answer = eval(val)
@@ -222,6 +222,9 @@ function help() {
 
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">getrandomcolor</span> - get random color <br>
+
+	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
+	title="Add to command line">version</span> - get version of product <br>
 
 	<span class="clickable" onclick="javascript:void(sP.field.value = '$' + this.innerHTML)"
 	title="Add to command line">solve</span> - solves the equation, check <span class="clickable"
@@ -365,17 +368,49 @@ function lcm(a, b) {
 	return a * b / gcd(a, b)
 }
 
+function handleExpression(str) {
+	// tokenizer for expressions and next solving
+  const countOfOpeningBracket = (str.match(/\(/g) || []).length
+  const countOfClosingBracket = (str.match(/\)/g) || []).length
+  if (countOfOpeningBracket > countOfClosingBracket)
+    str += ')'
+  else if (countOfOpeningBracket < countOfClosingBracket)
+    str = '(' + str
+
+  str = str
+          .replace(/(\d+\.*\d*)([\(])/g, '$1*$2') // number( => number*(
+          .replace(/([a-zA-Z]+)([\(])/g, '$1*$2') // variable( => variable*(
+          .replace(/(\d+\.*\d*)([a-zA-Z]+)/g, '$1*$2') // number and variable => number * variable
+          .replace(/\^/g, '**') // ^ => **
+
+  functionsWithParams.forEach( func => {
+    for (let i = 0; i < (str.match(new RegExp(func + '*', 'g')) || []).length; i++) {
+      st = str
+      st = st.split('')
+      st.splice(str.match(new RegExp(func + '*')).index + func.length, 1)
+      st = st.join('')
+      str = st
+    }
+  })
+
+  return str
+}
+
 function copyText(str) {
 	navigator.clipboard.writeText(str)
 }
 
 function sayhi() {
-	sP.outconsole(`<img src="logobot.png" alt="console-bot"><br>Hi, my name is Johny!`)
+	sP.outconsole(`<img src="images/firefox/firefox-general-256-256.png" alt="console-bot"><br>Hi, my name is Johny!`)
+}
+
+function version() {
+	sP.outconsole(`Console-Bot App version 2.0.1`)
 }
 
 function solve(str, lowerRange = -10, upperRange = 10, step = .1) {
-
 	let answers = []
+	str = handleExpression(str)
 	sP.outconsole(`${sP.cin}Solves of equation ${str} = 0 on the interval from
 		${lowerRange} to ${upperRange} with step = ${step}:`)
 
